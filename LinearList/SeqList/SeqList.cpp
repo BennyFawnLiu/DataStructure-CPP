@@ -1,119 +1,56 @@
 #include <iostream>
-#define MAXSIZE 100 // 顺序表最大容量
+#include <string>
+using namespace std;
 
-// 定义顺序表结构体（C++中可直接用struct，也可封装为类）
-struct SeqList
+// 宏定义：顺序表最大容量
+#define MAXSIZE 100
+
+// 数据元素类型定义：存储字符串（姓名）
+struct ElemType
 {
-    int elem[MAXSIZE]; // 存储元素的数组
-    int last;          // 记录最后一个元素的位置
-
-    // 构造函数：初始化空表
-    SeqList() : last(-1) {}
-
-    // 1. 判断顺序表是否为空
-    bool isEmpty() const
-    {
-        return last == -1;
-    }
-
-    // 2. 插入元素：在位置pos插入值为value的元素
-    bool insert(int pos, int value)
-    {
-        // 检查顺序表是否已满
-        if (last == MAXSIZE - 1)
-        {
-            std::cerr << "顺序表已满，无法插入！" << std::endl;
-            return false;
-        }
-        // 检查插入位置是否合法
-        if (pos < 0 || pos > last + 1)
-        {
-            std::cerr << "插入位置不合法！" << std::endl;
-            return false;
-        }
-        // 元素后移，腾出插入位置
-        for (int i = last; i >= pos; --i)
-        {
-            elem[i + 1] = elem[i];
-        }
-        // 插入元素
-        elem[pos] = value;
-        ++last;
-        return true;
-    }
-
-    // 3. 删除指定位置pos的元素
-    bool remove(int pos)
-    {
-        // 检查顺序表是否为空
-        if (isEmpty())
-        {
-            std::cerr << "顺序表为空，无法删除！" << std::endl;
-            return false;
-        }
-        // 检查删除位置是否合法
-        if (pos < 0 || pos > last)
-        {
-            std::cerr << "删除位置不合法！" << std::endl;
-            return false;
-        }
-        // 元素前移，覆盖被删除元素
-        for (int i = pos; i < last; ++i)
-        {
-            elem[i] = elem[i + 1];
-        }
-        --last;
-        return true;
-    }
-
-    // 4. 查找值为value的元素，返回其位置（-1表示未找到）
-    int search(int value) const
-    {
-        for (int i = 0; i <= last; ++i)
-        {
-            if (elem[i] == value)
-            {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    // 5. 遍历顺序表
-    void traverse() const
-    {
-        if (isEmpty())
-        {
-            std::cout << "顺序表为空！" << std::endl;
-            return;
-        }
-        std::cout << "顺序表元素：";
-        for (int i = 0; i <= last; ++i)
-        {
-            std::cout << elem[i] << " ";
-        }
-        std::cout << std::endl;
-    }
+    string name; // 数据域：存储姓名
 };
 
-// 主函数测试
+// 顺序表结构定义
+struct SqList
+{
+    ElemType *elem; // 指向存储数据元素的动态数组(程序运行时申请空间)
+    int length;     // 顺序表当前实际长度（有效元素个数）
+};
+
+// 全局顺序表对象（也可在main中定义局部对象）
+SqList L;
+
+// 初始化顺序表
+bool InitList(SqList &L) // 用引用&，这样函数里修改的是外面的L
+{
+    // 1.程序运行时，根据需要申请一块连续的内存，大小是 MAXSIZE 个 ElemType元素
+    L.elem = new ElemType[MAXSIZE];
+
+    // 申请成功后，电脑会返回这块空间的「起始地址」（比如 0x0012FF30，一串十六进制数字）；
+    // L.elem = 起始地址：把这个地址存到 elem 指针里 —— 从此，L.elem 就 “指向” 了这个动态数组。
+
+    // 2. 检查内存是否分配成功（防止内存不足的情况）
+    if (L.elem == nullptr) // 如果分配失败，指针会是空
+    {
+        cout << "内存分配失败，顺序表初始化失败！" << endl;
+        return false; // 返回false表示初始化失败
+    }
+
+    // 3. 初始化顺序表的当前长度为0（因为刚开始里面没有元素）
+    L.length = 0;
+
+    cout << "顺序表初始化成功！" << endl;
+    return true; // 返回true表示初始化成功
+}
+
 int main()
 {
-    SeqList L; // 自动调用构造函数初始化（last=-1）
+    // 调用初始化函数
+    InitList(L);
 
-    // 测试插入
-    L.insert(0, 10);
-    L.insert(1, 20);
-    L.insert(1, 15);
-    L.traverse(); // 输出：10 15 20
-
-    // 测试查找
-    int pos = L.search(15);
-    std::cout << "元素15的位置:" << pos << std::endl; // 输出：1
-
-    // 测试删除
-    L.remove(1);
-    L.traverse(); // 输出：10 20
+    // 可以查看一下初始化后的长度（应该是0）
+    cout << "顺序表当前长度：" << L.length << endl;
 
     return 0;
 }
